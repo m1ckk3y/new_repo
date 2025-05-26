@@ -32,3 +32,26 @@ SHAPES = [
     [[1, 1, 0], [0, 1, 1]], # S
     [[0, 1, 1], [1, 1, 0]]  # Z
 ]
+
+COLORS = [CYAN, YELLOW, MAGENTA, ORANGE, BLUE, GREEN, RED]
+
+class Tetromino:
+    def __init__(self):
+        self.shape = random.randint(0, len(SHAPES) - 1)
+        self.rotation = 0
+        self.x = GRID_WIDTH // 2 - len(SHAPES[self.shape][0]) // 2
+        self.y = 0
+        self.color = COLORS[self.shape]
+
+    def rotate(self):
+        self.rotation = (self.rotation + 1) % 4
+
+class TetrisGame:
+    def __init__(self):
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption('Tetris')
+        self.clock = pygame.time.Clock()
+        self.grid = [[BLACK for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+        self.current_piece = Tetromino()
+        self.game_over = False
+        self.score = 0
