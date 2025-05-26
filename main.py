@@ -55,3 +55,34 @@ class TetrisGame:
         self.current_piece = Tetromino()
         self.game_over = False
         self.score = 0
+
+    def draw_grid(self):
+        for y in range(GRID_HEIGHT):
+            for x in range(GRID_WIDTH):
+                pygame.draw.rect(self.screen, self.grid[y][x],
+                               (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 0)
+                pygame.draw.rect(self.screen, WHITE,
+                               (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 1)
+
+    def draw_current_piece(self):
+        shape = SHAPES[self.current_piece.shape]
+        for y in range(len(shape)):
+            for x in range(len(shape[0])):
+                if shape[y][x]:
+                    pygame.draw.rect(self.screen, self.current_piece.color,
+                                   ((self.current_piece.x + x) * BLOCK_SIZE,
+                                    (self.current_piece.y + y) * BLOCK_SIZE,
+                                    BLOCK_SIZE, BLOCK_SIZE), 0)
+
+    def move_piece(self, dx, dy):
+        self.current_piece.x += dx
+        self.current_piece.y += dy
+        if not self.valid_move():
+            self.current_piece.x -= dx
+            self.current_piece.y -= dy
+            if dy > 0:
+                self.freeze_piece()
+                self.clear_lines()
+                self.current_piece = Tetromino()
+                if not self.valid_move():
+                    self.game_over = True
