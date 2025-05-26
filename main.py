@@ -86,3 +86,69 @@ class TetrisGame:
                 self.current_piece = Tetromino()
                 if not self.valid_move():
                     self.game_over = True
+
+    def valid_move(self):
+        shape = SHAPES[self.current_piece.shape]
+        for y in range(len(shape)):
+            for x in range(len(shape[0])):
+                if shape[y][x]:
+                    if (self.current_piece.x + x < 0 or
+                        self.current_piece.x + x >= GRID_WIDTH or
+                        self.current_piece.y + y >= GRID_HEIGHT or
+                        self.grid[self.current_piece.y + y][self.current_piece.x + x] != BLACK):
+                        return False
+        return True
+
+    def freeze_piece(self):
+        shape = SHAPES[self.current_piece.shape]
+        for y in range(len(shape)):
+            for x in range(len(shape[0])):
+                if shape[y][x]:
+                    self.grid[self.current_piece.y + y][self.current_piece.x + x] = self.current_piece.color
+
+    def clear_lines(self):
+        lines_cleared = 0
+        for y in range(GRID_HEIGHT - 1, -1, -1):
+            if all(color != BLACK for color in self.grid[y]):
+                lines_cleared += 1
+                del self.grid[y]
+                self.grid.insert(0, [BLACK for _ in range(GRID_WIDTH)])
+        self.score += lines_cleared * 100
+
+    def run(self):
+        fall_time = 0
+        fall_speed = 0.5  # seconds
+        
+        while not self.game_over:
+            fall_time += self.clock.get_rawtime()
+            self.clock.tick()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        self.move_piece(-1, 0)
+                    elif event.key == pygame.K_RIGHT:
+                        self.move_piece(1, 0)
+                    elif event.key == pygame.K_DOWN:
+                        self.move_piece(0, 1)
+                    elif event.key == pygame.K_UP:
+                        self.current_piece.rotate()
+                        if not self.valid_move():
+                            self.current_piece.rotation = (self.current_piece.rotation - 1) % 4
+
+            if fall_time >= fall_speed * 1000:
+                self.move_piece(0, 1)
+                fall_time = 0
+
+            self.screen.fill(BLACK)
+            self.draw_grid()
+            self.draw_current_piece()
+            pygame.display.flip()
+
+        pygame.quit()
+
+if __name__ == "__main__":
+    game = TetrisGame()
+    game.run()
